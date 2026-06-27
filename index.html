@@ -48,19 +48,18 @@
         function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
         window.addEventListener('resize', resize); resize();
 
-        // Vraag direct om de naam van de speler
         let spelerNaam = prompt("Voer je naam in voor de wereldwijde highscore:", "Gast");
         if(!spelerNaam || spelerNaam.trim() === "") spelerNaam = "Anoniem";
         spelerNaam = spelerNaam.substring(0, 12);
 
-        const player = { x:50, y:canvas.height-200, w:56, h:28, vx:0, vy:0, speed:6, jump:12, ground:false };
+        // De speler met de herstelde loopsnelheid van 4
+        const player = { x:50, y:canvas.height-200, w:56, h:28, vx:0, vy:0, speed:4, jump:12, ground:false };
         const gravity = 0.5, keys = {};
         let camX = 0, win = false, isDead = false, tick = 0, gY = canvas.height-100;
         
         let chatOpen = false;
         let ownerMode = false; 
 
-        // Systeem om pas te starten bij beweging
         let timerGestart = false; 
         let timeLeft = 20000; 
         let lastTime = performance.now();
@@ -78,17 +77,14 @@
                 if (!timerGestart) lastTime = performance.now();
                 return;
             }
-            
             const now = performance.now();
             const delta = now - lastTime;
             lastTime = now;
-
             timeLeft -= delta;
             if (timeLeft <= 0) {
                 timeLeft = 0;
                 triggerDeath("SKILL ISSUE");
             }
-
             const sec = Math.floor(timeLeft / 1000);
             const ms = Math.floor((timeLeft % 1000) / 10);
             document.getElementById('timer-display').innerText = `TIJD: ${sec}.${ms < 10 ? '0' : ''}${ms}`;
@@ -103,7 +99,7 @@
             document.getElementById('d').style.display = 'flex';
         }
 
-        // De level data (obby structuur)
+        // De complete level obby data
         const lv = [
             [0,gY,180,0], [260,gY-50,100,0], [420,gY-110,90,0],
             [580,gY-70,100,1,580,140,1,2.5], [850,gY-130,80,0], [1010,gY-190,60,0],
@@ -114,6 +110,7 @@
             [3350,gY-160,70,0], [3500,gY-100,60,2,3500,30], [3640,gY-150,250,3]
         ];
         
+        // DE FIX: De array-mapping pakt nu alle elementen correct uit, [1], [2] etc.
         const platforms = lv.map(p => ({ 
             x: p[0], y: p[1], w: p[2], h: 24, t: p[3], 
             sx: p[4] || 0, rg: p[5] || 0, dir: p[6] || 0, sp: p[7] || 30, 
@@ -130,7 +127,6 @@
             }
             if(!isDead && !win) {
                 keys[e.code] = true;
-                
                 if (!timerGestart && ['KeyA', 'KeyD', 'KeyW', 'Space', 'ArrowLeft', 'ArrowRight', 'ArrowUp'].includes(e.code)) {
                     timerGestart = true;
                     lastTime = performance.now();
@@ -172,7 +168,6 @@
                 lastTime = performance.now();
                 document.getElementById('timer-display').style.display = 'block';
             }
-            // NIEUW: Commando om het complete scorebord te resetten
             else if (tekst === 'resetboard') {
                 localStorage.removeItem('shark_game_scores');
                 laadHighscores();
